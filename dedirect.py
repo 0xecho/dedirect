@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 import fire
 
-def get_final_url(url, max_threads):
+def get_final_url(url):
 	if not url.startswith('http'):
 		url = 'https://'+url
 	resp = requests.head(url, allow_redirects=True)
@@ -13,14 +13,16 @@ def dedirect(url=None, max_threads=25):
 		Follows redirects and print the final url 
 	"""
 	if url:
-		return get_final_url(url, max_threads)
+		return get_final_url(url)
 	else:
+		executor= ThreadPoolExecutor(max_workers=max_threads)
 		while True:
 			try:
-				with ThreadPoolExecutor(max_workers=25) as executor:
-					executor.submit(get_final_url, input(), max_threads)
-			except:
+				url = input()
+				executor.submit(get_final_url, url)
+			except Exception as e:
 				break
+		executor.shutdown(wait=True)
 
 if __name__ == '__main__':
 	fire.Fire(dedirect)
